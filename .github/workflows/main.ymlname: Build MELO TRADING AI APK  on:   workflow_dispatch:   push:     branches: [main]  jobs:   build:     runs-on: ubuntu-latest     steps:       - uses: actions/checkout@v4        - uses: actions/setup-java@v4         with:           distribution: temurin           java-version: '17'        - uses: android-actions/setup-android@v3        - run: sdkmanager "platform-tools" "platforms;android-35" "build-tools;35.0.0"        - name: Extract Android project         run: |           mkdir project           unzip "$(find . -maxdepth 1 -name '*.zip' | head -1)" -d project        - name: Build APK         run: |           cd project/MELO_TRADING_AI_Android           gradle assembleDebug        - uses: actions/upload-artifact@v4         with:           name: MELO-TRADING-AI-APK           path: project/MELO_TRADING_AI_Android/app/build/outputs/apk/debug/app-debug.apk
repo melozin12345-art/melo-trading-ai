@@ -1,0 +1,41 @@
+name: Build Android App
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Extract Android project
+      run: |
+        mkdir project
+        unzip "$(find . -maxdepth 1 -name '*.zip' | head -1)" -d project
+
+    - name: Build APK
+      run: |
+        cd project/MELO_TRADING_AI_Android
+        chmod +x gradlew
+        ./gradlew assembleDebug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MELO-TRADING-AI-APK
+        path: project/MELO_TRADING_AI_Android/app/build/outputs/apk/debug/app-debug.apk
+        
